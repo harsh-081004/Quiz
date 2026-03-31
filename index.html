@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>India GK Quiz App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --saffron: #ff9933;
+      --navy: #06134a;
+      --ivory: #fffbf0;
+      --ink: #18204a;
+      --ok: #137a3f;
+      --bad: #b21f2d;
+      --card: #ffffff;
+      --soft: #e6e9f6;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Noto Sans", sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at 15% 5%, #fff4dd 0%, var(--ivory) 55%, #f6f8ff 100%);
+    }
+
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hero {
+      padding: 26px;
+      border-radius: 18px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--saffron), #f28000 55%, #d96a00);
+      box-shadow: 0 12px 26px rgba(201, 103, 0, 0.25);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: -45% auto auto -25%;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      filter: blur(2px);
+      animation: drift 5s ease-in-out infinite;
+    }
+
+    @keyframes drift {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(18px, 12px); }
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-family: "Playfair Display", serif;
+      font-size: clamp(1.7rem, 4vw, 2.4rem);
+      letter-spacing: 0.2px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .sub {
+      margin: 0;
+      position: relative;
+      z-index: 1;
+      opacity: 0.95;
+    }
+
+    .modes {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin: 16px 0 22px;
+    }
+
+    .mode {
+      border-radius: 16px;
+      background: var(--card);
+      border: 2px solid transparent;
+      box-shadow: 0 8px 22px rgba(20, 34, 85, 0.1);
+      padding: 18px;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      cursor: pointer;
+    }
+
+    .mode:hover:not(.locked):not(.done) {
+      transform: translateY(-2px);
+      border-color: var(--saffron);
+      box-shadow: 0 12px 25px rgba(20, 34, 85, 0.16);
+    }
+
+    .mode h3 {
+      margin: 0 0 6px;
+      font-family: "Playfair Display", serif;
+      color: var(--navy);
+    }
+
+    .mode p {
+      margin: 0;
+      color: #37406c;
+      font-size: 0.95rem;
+    }
+
+    .mode.active {
+      border-color: var(--navy);
+      outline: 2px solid rgba(6, 19, 74, 0.14);
+    }
+
+    .mode.locked {
+      cursor: not-allowed;
+      border-style: dashed;
+      background: #fcfcff;
+    }
+
+    .mode.done {
+      cursor: default;
+      opacity: 0.82;
+      background: #f7f9ff;
+    }
+
+    .lock {
+      font-size: 1.4rem;
+      margin-right: 4px;
+      display: inline-block;
+      transform-origin: center;
+      animation: pulse 1.05s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+    }
+
+    .countdown {
+      margin-top: 10px;
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #fff0dc;
+      color: #a55a00;
+      font-size: 0.85rem;
+      font-weight: 700;
+      animation: pulseLabel 1s ease-in-out infinite;
+    }
+
+    @keyframes pulseLabel {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.55; }
+    }
+
+    .quiz {
+      background: var(--card);
+      border-radius: 18px;
+      box-shadow: 0 12px 28px rgba(15, 31, 94, 0.12);
+      padding: 24px;
+      min-height: 320px;
+      transition: all 0.24s ease;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .meta {
+      color: #56609a;
+      font-weight: 700;
+      font-size: 0.86rem;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    .q {
+      margin: 10px 0 18px;
+      font-size: clamp(1.08rem, 2.4vw, 1.35rem);
+      line-height: 1.5;
+      font-family: "Playfair Display", serif;
+      color: var(--navy);
+    }
+
+    .opts {
+      display: grid;
+      gap: 10px;
+    }
+
+    .opt {
+      border: 2px solid var(--soft);
+      border-radius: 12px;
+      padding: 11px 12px;
+      background: #fff;
+      cursor: pointer;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+
+    .opt:hover:not(.disabled) {
+      border-color: var(--saffron);
+      transform: translateX(3px);
+    }
+
+    .opt .tag {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f0f3ff;
+      color: #2b3a79;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .opt.sel {
+      border-color: var(--navy);
+      background: #eef2ff;
+    }
+
+    .opt.correct {
+      border-color: var(--ok);
+      background: #eaf8ef;
+    }
+
+    .opt.wrong {
+      border-color: var(--bad);
+      background: #fdeff1;
+    }
+
+    .opt.disabled {
+      cursor: default;
+    }
+
+    .actions {
+      margin-top: 18px;
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(135deg, var(--saffron), #ff8800);
+      box-shadow: 0 8px 16px rgba(227, 132, 9, 0.22);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .next {
+      background: linear-gradient(135deg, var(--navy), #102475);
+    }
+
+    .fb {
+      margin-top: 14px;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 700;
+    }
+
+    .fb.good {
+      background: #e9f8ef;
+      color: #0d6a35;
+    }
+
+    .fb.bad {
+      background: #fdecee;
+      color: #9d1a28;
+    }
+
+    .result {
+      margin-top: 16px;
+      background: linear-gradient(145deg, #0c1f67, #07174d);
+      color: #fff;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 12px 26px rgba(8, 18, 60, 0.28);
+    }
+
+    .result h2 {
+      margin: 0 0 8px;
+      font-family: "Playfair Display", serif;
+    }
+
+    .score {
+      font-size: clamp(2rem, 8vw, 3.1rem);
+      color: #ffd08b;
+      font-weight: 700;
+      margin: 8px 0 4px;
+      font-family: "Playfair Display", serif;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #f6f0e5;
+    }
+
+    .sync {
+      margin-top: 12px;
+      font-size: 0.9rem;
+      color: #d6defe;
+    }
+
+    .name-block {
+      margin: 10px 0 14px;
+      background: #f7f9ff;
+      border: 1px solid #dbe3ff;
+      border-radius: 12px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .name-input {
+      width: 100%;
+      border: 1px solid #c8d3ff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: inherit;
+    }
+
+    .name-input:focus {
+      outline: none;
+      border-color: var(--navy);
+      box-shadow: 0 0 0 2px rgba(6, 19, 74, 0.12);
+    }
+
+    .name-btn {
+      background: linear-gradient(135deg, var(--navy), #102475);
+      box-shadow: 0 8px 16px rgba(9, 24, 88, 0.22);
+    }
+
+    @media (max-width: 760px) {
+      .wrap { padding: 14px; }
+      .modes { grid-template-columns: 1fr; }
+      .quiz { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>🇮🇳 India General Knowledge Quiz</h1>
+      <p class="sub">Before/After practice assessment with timed unlock and cloud sync.</p>
+    </div>
+
+    <section class="modes">
+      <article id="beforeCard" class="mode active" role="button" tabindex="0">
+        <h3>Before Practice Test</h3>
+        <p>Unlocked by default. Complete this first.</p>
+      </article>
+      <article id="afterCard" class="mode locked" role="button" tabindex="0">
+        <h3><span class="lock">🔒</span>After Practice Test</h3>
+        <p>Unlocks after 1 minute once Before Practice is submitted.</p>
+        <div id="countdown" class="countdown">Unlocks in 15s</div>
+      </article>
+    </section>
+
+    <section id="quiz" class="quiz">
+      <div id="nameBlock" class="name-block hidden">
+        <input id="nameInput" class="name-input" type="text" placeholder="Enter your name to start test" />
+        <button id="nameStartBtn" class="name-btn" type="button">Start Test</button>
+      </div>
+      <div id="meta" class="meta">Question 1 of 5</div>
+      <div id="question" class="q"></div>
+      <div id="options" class="opts"></div>
+      <div id="feedback" class="fb hidden"></div>
+      <div class="actions">
+        <button id="submitBtn" disabled>Submit Answer</button>
+        <button id="nextBtn" class="next hidden">Next</button>
+      </div>
+    </section>
+
+    <section id="result" class="result hidden">
+      <h2>Test Submitted</h2>
+      <div id="scoreText" class="score">0 / 5</div>
+      <div id="resultMsg">Your final score is shown above.</div>
+      <div id="modeState" class="status"></div>
+      <div id="syncState" class="sync"></div>
+      <div class="actions">
+        <button id="submitScoreBtn" class="next hidden" type="button">Submit Score</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzgtTMqOJSLwa2aBgkxmdRhiyOmNcvKRqCT1h-fpgmnNt2rlm_5aNg30uhdCrMQlvgeww/exec";
+    const STORAGE_KEY = "indiaGkQuizStateV2";
+    const UNLOCK_MS = 15 * 1000;
+
+    const questions = [
+      {
+        question: "Who was the first President of independent India?",
+        options: ["Jawaharlal Nehru", "Dr. Rajendra Prasad", "Sardar Patel", "Dr. B. R. Ambedkar"],
+        correctIndex: 1
+      },
+      {
+        question: "Which river is often called the 'Ganga of South India'?",
+        options: ["Narmada", "Krishna", "Godavari", "Mahanadi"],
+        correctIndex: 2
+      },
+      {
+        question: "The Constitution of India was adopted on:",
+        options: ["15 August 1947", "26 January 1950", "26 November 1949", "2 October 1948"],
+        correctIndex: 2
+      },
+      {
+        question: "Which Indian state has the longest coastline?",
+        options: ["Andhra Pradesh", "Gujarat", "Tamil Nadu", "Maharashtra"],
+        correctIndex: 1
+      },
+      {
+        question: "Sattriya is a classical dance form associated with:",
+        options: ["Assam", "Kerala", "Odisha", "Punjab"],
+        correctIndex: 0
+      }
+    ];
+
+    const state = {
+      mode: "before",
+      beforeDone: false,
+      afterDone: false,
+      unlockAt: null,
+      quizIndex: 0,
+      selected: null,
+      score: 0,
+      answers: [],
+      history: [],
+      submittedCurrentQuestion: false,
+      currentUserName: ""
+    };
+
+    let countdownTimer = null;
+    let pendingAttempt = null;
+
+    const beforeCard = document.getElementById("beforeCard");
+    const afterCard = document.getElementById("afterCard");
+    const countdownEl = document.getElementById("countdown");
+    const quizEl = document.getElementById("quiz");
+    const resultEl = document.getElementById("result");
+    const metaEl = document.getElementById("meta");
+    const qEl = document.getElementById("question");
+    const optionsEl = document.getElementById("options");
+    const feedbackEl = document.getElementById("feedback");
+    const submitBtn = document.getElementById("submitBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const nameBlock = document.getElementById("nameBlock");
+    const nameInput = document.getElementById("nameInput");
+    const nameStartBtn = document.getElementById("nameStartBtn");
+    const scoreText = document.getElementById("scoreText");
+    const resultMsg = document.getElementById("resultMsg");
+    const modeState = document.getElementById("modeState");
+    const syncState = document.getElementById("syncState");
+    const submitScoreBtn = document.getElementById("submitScoreBtn");
+
+    function saveLocal() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function loadLocal() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        Object.assign(state, parsed);
+      } catch (_) {}
+    }
+
+    function isAfterUnlocked() {
+      if (!state.unlockAt) return false;
+      return Date.now() >= state.unlockAt;
+    }
+
+    function formatSecs(ms) {
+      return Math.max(0, Math.ceil(ms / 1000));
+    }
+
+    function updateModeCards() {
+      beforeCard.classList.toggle("active", state.mode === "before");
+      afterCard.classList.toggle("active", state.mode === "after");
+
+      beforeCard.classList.toggle("done", state.beforeDone);
+      afterCard.classList.toggle("done", state.afterDone);
+
+      const afterLocked = !isAfterUnlocked();
+      afterCard.classList.toggle("locked", afterLocked);
+
+      if (afterLocked) {
+        const left = state.unlockAt ? formatSecs(state.unlockAt - Date.now()) : 60;
+        countdownEl.classList.remove("hidden");
+        countdownEl.textContent = `Unlocks in ${left}s`;
+      } else {
+        countdownEl.classList.add("hidden");
+      }
+    }
+
+    function startCountdownIfNeeded() {
+      if (countdownTimer) {
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+      }
+      if (!state.unlockAt || isAfterUnlocked()) {
+        updateModeCards();
+        return;
+      }
+      updateModeCards();
+      countdownTimer = setInterval(() => {
+        updateModeCards();
+        if (isAfterUnlocked()) {
+          clearInterval(countdownTimer);
+          countdownTimer = null;
+        }
+      }, 300);
+    }
+
+    function canStartMode(mode) {
+      if (mode === "before") return !state.beforeDone;
+      return isAfterUnlocked() && !state.afterDone;
+    }
+
+    function resetCurrentAttempt(mode) {
+      state.mode = mode;
+      state.quizIndex = 0;
+      state.selected = null;
+      state.score = 0;
+      state.answers = [];
+      state.submittedCurrentQuestion = false;
+      saveLocal();
+      showQuiz();
+      if (state.currentUserName && state.currentUserName.trim()) {
+        renderQuestion();
+      } else {
+        renderNameGate();
+      }
+      updateModeCards();
+    }
+
+    function showQuiz() {
+      resultEl.classList.add("hidden");
+      quizEl.classList.remove("hidden");
+    }
+
+    function showResult() {
+      quizEl.classList.add("hidden");
+      resultEl.classList.remove("hidden");
+    }
+
+    function renderQuestion() {
+      nameBlock.classList.add("hidden");
+      const idx = state.quizIndex;
+      const q = questions[idx];
+
+      const candidate = state.currentUserName ? `Candidate: ${state.currentUserName} • ` : "";
+      metaEl.textContent = `${candidate}Question ${idx + 1} of ${questions.length}`;
+      qEl.textContent = q.question;
+      feedbackEl.className = "fb hidden";
+      feedbackEl.textContent = "";
+
+      submitBtn.disabled = state.selected === null || state.submittedCurrentQuestion;
+      submitBtn.classList.toggle("hidden", state.submittedCurrentQuestion);
+      nextBtn.classList.toggle("hidden", !state.submittedCurrentQuestion);
+
+      optionsEl.innerHTML = "";
+      q.options.forEach((opt, i) => {
+        const row = document.createElement("div");
+        row.className = "opt";
+        const tag = String.fromCharCode(65 + i);
+        row.innerHTML = `<span class="tag">${tag}</span><span>${opt}</span>`;
+        if (state.selected === i) row.classList.add("sel");
+        if (state.submittedCurrentQuestion) row.classList.add("disabled");
+        row.addEventListener("click", () => {
+          if (state.submittedCurrentQuestion) return;
+          state.selected = i;
+          saveLocal();
+          renderQuestion();
+        });
+        optionsEl.appendChild(row);
+      });
+    }
+
+    function submitCurrentQuestion() {
+      if (state.selected === null || state.submittedCurrentQuestion) return;
+      const q = questions[state.quizIndex];
+      const correct = state.selected === q.correctIndex;
+      if (correct) state.score += 1;
+
+      const record = {
+        testType: state.mode === "before" ? "Before Practice" : "After Practice",
+        question: q.question,
+        selectedAnswer: q.options[state.selected],
+        correctAnswer: q.options[q.correctIndex],
+        isCorrect: correct,
+        score: correct ? 1 : 0,
+        timestamp: new Date().toISOString()
+      };
+      state.answers.push(record);
+      state.submittedCurrentQuestion = true;
+      saveLocal();
+
+      const optNodes = [...optionsEl.querySelectorAll(".opt")];
+      optNodes.forEach((el) => el.classList.add("disabled"));
+      optNodes[q.correctIndex].classList.add("correct");
+      if (!correct) optNodes[state.selected].classList.add("wrong");
+
+      feedbackEl.classList.remove("hidden");
+      if (correct) {
+        feedbackEl.classList.add("good");
+        feedbackEl.textContent = "Correct answer.";
+      } else {
+        feedbackEl.classList.add("bad");
+        feedbackEl.textContent = `Incorrect. Correct answer: ${q.options[q.correctIndex]}`;
+      }
+
+      submitBtn.classList.add("hidden");
+      nextBtn.classList.remove("hidden");
+    }
+
+    function renderNameGate() {
+      nameBlock.classList.remove("hidden");
+      metaEl.textContent = "Ready to begin";
+      qEl.textContent = "Please enter your name, then start the test.";
+      optionsEl.innerHTML = "";
+      feedbackEl.className = "fb hidden";
+      submitBtn.classList.add("hidden");
+      nextBtn.classList.add("hidden");
+      nameInput.value = state.currentUserName || "";
+      nameInput.focus();
+    }
+
+    function startQuizAfterName() {
+      const v = nameInput.value.trim();
+      if (!v) {
+        alert("Please enter your name.");
+        return;
+      }
+      state.currentUserName = v;
+      state.quizIndex = 0;
+      state.selected = null;
+      state.score = 0;
+      state.answers = [];
+      state.submittedCurrentQuestion = false;
+      saveLocal();
+      renderQuestion();
+    }
+
+    function submitWholeTest() {
+      const testType = state.mode === "before" ? "Before Practice" : "After Practice";
+      const finalScore = state.score;
+      const outOf = questions.length;
+      const completedAt = new Date().toISOString();
+
+      const attempt = {
+        testType,
+        finalScore,
+        outOf,
+        completedAt,
+        answers: state.answers
+      };
+
+      showResult();
+      pendingAttempt = attempt;
+
+      scoreText.textContent = `${finalScore} / ${outOf}`;
+      resultMsg.textContent = `Final score for ${state.currentUserName}. Click Submit Score.`;
+      modeState.textContent = "";
+      syncState.textContent = "";
+      submitScoreBtn.classList.remove("hidden");
+    }
+
+    async function sendAttemptToSheet(attempt, userName) {
+      if (!SHEETS_WEBAPP_URL) throw new Error("Missing sheet URL");
+      const payload = {
+        userName,
+        testType: attempt.testType,
+        finalScore: attempt.finalScore,
+        totalQuestions: attempt.outOf,
+        submittedAt: attempt.completedAt
+      };
+
+      await fetch(SHEETS_WEBAPP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    function nextStep() {
+      if (!state.submittedCurrentQuestion) return;
+      const isLast = state.quizIndex === questions.length - 1;
+      if (isLast) {
+        submitWholeTest();
+        return;
+      }
+      state.quizIndex += 1;
+      state.selected = null;
+      state.submittedCurrentQuestion = false;
+      saveLocal();
+      renderQuestion();
+    }
+
+    function wireEvents() {
+      submitBtn.addEventListener("click", submitCurrentQuestion);
+      nextBtn.addEventListener("click", nextStep);
+      submitScoreBtn.addEventListener("click", submitFinalScore);
+      nameStartBtn.addEventListener("click", startQuizAfterName);
+      nameInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") startQuizAfterName();
+      });
+
+      beforeCard.addEventListener("click", () => {
+        if (!canStartMode("before")) return;
+        resetCurrentAttempt("before");
+      });
+
+      afterCard.addEventListener("click", () => {
+        if (!canStartMode("after")) return;
+        resetCurrentAttempt("after");
+      });
+    }
+
+    async function submitFinalScore() {
+      if (!pendingAttempt) return;
+      const userName = (state.currentUserName || "").trim();
+      if (!userName) {
+        alert("Name is required. Restart test and enter name.");
+        return;
+      }
+
+      submitScoreBtn.disabled = true;
+      syncState.textContent = "Submitting score...";
+      try {
+        await sendAttemptToSheet(pendingAttempt, userName.trim());
+        const savedAttempt = { ...pendingAttempt, userName: userName.trim() };
+        state.history.push(savedAttempt);
+
+        if (state.mode === "before") {
+          state.beforeDone = true;
+          if (!state.unlockAt) state.unlockAt = Date.now() + UNLOCK_MS;
+          modeState.textContent = "Before Practice submitted. After Practice unlocks in 15 seconds.";
+        } else {
+          state.afterDone = true;
+          modeState.textContent = "After Practice submitted. Both tests completed.";
+        }
+
+        saveLocal();
+        startCountdownIfNeeded();
+        updateModeCards();
+
+        syncState.textContent = "Submitted to Google Sheet.";
+        alert(`Submission successful!\nName: ${userName.trim()}\nTest: ${savedAttempt.testType}\nScore: ${savedAttempt.finalScore}/${savedAttempt.outOf}`);
+        submitScoreBtn.classList.add("hidden");
+        pendingAttempt = null;
+      } catch (e) {
+        syncState.textContent = "Submission failed. Please try again.";
+        alert("Submission failed. Check internet or Apps Script access.");
+      } finally {
+        submitScoreBtn.disabled = false;
+      }
+    }
+
+    function init() {
+      loadLocal();
+      wireEvents();
+      startCountdownIfNeeded();
+      updateModeCards();
+
+      if (state.beforeDone && state.afterDone) {
+        showResult();
+        const last = state.history[state.history.length - 1];
+        if (last) {
+          scoreText.textContent = `${last.finalScore} / ${last.outOf}`;
+        }
+        resultMsg.textContent = "All tests completed. Retest is disabled.";
+        modeState.textContent = "Before and After Practice tests are already submitted.";
+        return;
+      }
+
+      if (state.mode === "after" && !canStartMode("after")) {
+        state.mode = "before";
+      }
+
+      if ((state.mode === "before" && !canStartMode("before")) && canStartMode("after")) {
+        state.mode = "after";
+      }
+
+      if (canStartMode(state.mode)) {
+        if (!Array.isArray(state.answers)) state.answers = [];
+        if (state.quizIndex >= questions.length) state.quizIndex = 0;
+        state.selected = null;
+        state.submittedCurrentQuestion = false;
+        saveLocal();
+        showQuiz();
+        renderNameGate();
+      } else {
+        showResult();
+        scoreText.textContent = "—";
+        resultMsg.textContent = "Before test completed. Wait for unlock to take After test.";
+        modeState.textContent = "";
+        syncState.textContent = "";
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
