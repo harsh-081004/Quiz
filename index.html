@@ -693,11 +693,12 @@
 
     async function sendAttemptToSheet(attempt, userName) {
       if (!SHEETS_WEBAPP_URL) throw new Error("Missing sheet URL");
+      const scoreOutOf20 = attempt.finalScore * 4;
       const payload = {
         userName,
         testType: attempt.testType,
-        finalScore: attempt.finalScore,
-        totalQuestions: attempt.outOf,
+        finalScore: scoreOutOf20,
+        totalQuestions: 20,
         submittedAt: attempt.completedAt
       };
 
@@ -772,7 +773,7 @@
         updateModeCards();
 
         syncState.textContent = "Submitted to Google Sheet.";
-        alert(`Submission successful!\nName: ${userName.trim()}\nTest: ${savedAttempt.testType}\nScore: ${savedAttempt.finalScore}/${savedAttempt.outOf}`);
+        alert(`Submission successful!\nName: ${userName.trim()}\nTest: ${savedAttempt.testType}\nStored Score: ${savedAttempt.finalScore * 4}/20`);
         submitScoreBtn.classList.add("hidden");
         pendingAttempt = null;
       } catch (e) {
